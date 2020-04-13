@@ -12,8 +12,28 @@
 
 #include <iostream>
 
+// Ray equation: p(t) = a + t * vec(b).
+// The equation of sphere: (p(t) - c) dot (p(t) - c) = r^2.
+// Therefore, (a + t * vec(b) - c) dot (a + t * vec(b) - c) = r^2.
+// => t^2 * vec(b) dot vec(b) + 2 * t * vec(b) dot vec(a - c) + vec(a - c) dot vec(a - c) - r^2 = 0.
+bool hit_sphere(const vec3& center, double radius, const ray& r)
+{
+    const vec3 oc = r.origin() - center;
+    const auto a = dot(r.direction(), r.direction());
+    const auto b = 2.0 * dot(oc, r.direction());
+    const auto c = dot(oc, oc) - radius * radius;
+
+    const auto discriminant = b * b - 4 * a * c;
+    return discriminant > 0;
+}
+
 vec3 ray_color(const ray& r)
 {
+    if (hit_sphere(vec3{0, 0, -1}, 0.5, r))
+    {
+        return vec3{1, 0, 0};
+    }
+
     const vec3 unit_direction = unit_vector(r.direction());
     const auto t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * vec3{1.0, 1.0, 1.0} + t * vec3{0.5, 0.7, 1.0};
