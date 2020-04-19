@@ -91,16 +91,28 @@ class vec3
 
     void write_color(std::ostream& out, int samples_per_pixel)
     {
-        // Divide the color total by the number of samples.
+        // Divide the color total by the number of samples and gamma-correct
+        // for a gamma value of 2.0.
         const auto scale = 1.0 / samples_per_pixel;
-        auto r = scale * e[0];
-        auto g = scale * e[1];
-        auto b = scale * e[2];
+        const auto r = sqrt(scale * e[0]);
+        const auto g = sqrt(scale * e[1]);
+        const auto b = sqrt(scale * e[2]);
 
         // Write the translated [0,255] value of each color component.
         out << static_cast<int>(256 * std::clamp(r, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * std::clamp(g, 0.0, 0.999)) << ' '
             << static_cast<int>(256 * std::clamp(b, 0.0, 0.999)) << '\n';
+    }
+
+    static vec3 random()
+    {
+        return vec3(random_double(), random_double(), random_double());
+    }
+
+    static vec3 random(double min, double max)
+    {
+        return vec3(random_double(min, max), random_double(min, max),
+                    random_double(min, max));
     }
 
     double e[3];
@@ -156,6 +168,44 @@ inline vec3 cross(const vec3& u, const vec3& v)
 inline vec3 unit_vector(vec3 v)
 {
     return v / v.length();
+}
+
+inline vec3 random_in_unit_sphere()
+{
+    while (true)
+    {
+        auto p = vec3::random(-1, 1);
+        if (p.length_squared() >= 1)
+        {
+            continue;
+        }
+
+        return p;
+    }
+}
+
+inline vec3 random_unit_vector()
+{
+    const auto a = random_double(0, 2 * pi);
+    const auto z = random_double(-1, 1);
+    const auto r = sqrt(1 - z * z);
+
+    return vec3{r * std::cos(a), r * std::sin(a), z};
+}
+
+inline vec3 random_in_hemisphere(const vec3& normal)
+{
+    const vec3 in_unit_sphere = random_in_unit_sphere();
+
+    // In the same hemisphere as the normal
+    if (dot(in_unit_sphere, normal) > 0.0)
+    {
+        return in_unit_sphere;
+    }
+    else
+    {
+        return -in_unit_sphere;
+    }
 }
 
 #endif
