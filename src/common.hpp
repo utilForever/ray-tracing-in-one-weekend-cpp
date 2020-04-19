@@ -10,7 +10,9 @@
 #ifndef RAY_TRACING_COMMON_HPP
 #define RAY_TRACING_COMMON_HPP
 
+#include <functional>
 #include <limits>
+#include <random>
 
 // Common headers
 #include "ray.hpp"
@@ -34,6 +36,16 @@ inline double ffmin(double a, double b)
 inline double ffmax(double a, double b)
 {
     return a >= b ? a : b;
+}
+
+inline double random_double()
+{
+    static std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    static std::mt19937 generator;
+    static std::function<double()> rand_generator =
+        std::bind(distribution, generator);
+
+    return rand_generator();
 }
 
 #endif
