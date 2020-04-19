@@ -7,31 +7,18 @@
 // It is based on Ray Tracing in One Weekend book.
 // References: https://raytracing.github.io
 
-#include "ray.hpp"
-#include "vec3.hpp"
+#include "common.hpp"
+#include "hittable_list.hpp"
+#include "sphere.hpp"
 
 #include <iostream>
 
-// Ray equation: p(t) = a + t * vec(b).
-// The equation of sphere: (p(t) - c) dot (p(t) - c) = r^2.
-// Therefore, (a + t * vec(b) - c) dot (a + t * vec(b) - c) = r^2.
-// => t^2 * vec(b) dot vec(b) + 2 * t * vec(b) dot vec(a - c) + vec(a - c) dot vec(a - c) - r^2 = 0.
-bool hit_sphere(const vec3& center, double radius, const ray& r)
+vec3 ray_color(const ray& r, const hittable& world)
 {
-    const vec3 oc = r.origin() - center;
-    const auto a = dot(r.direction(), r.direction());
-    const auto b = 2.0 * dot(oc, r.direction());
-    const auto c = dot(oc, oc) - radius * radius;
-
-    const auto discriminant = b * b - 4 * a * c;
-    return discriminant > 0;
-}
-
-vec3 ray_color(const ray& r)
-{
-    if (hit_sphere(vec3{0, 0, -1}, 0.5, r))
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec))
     {
-        return vec3{1, 0, 0};
+        return 0.5 * (rec.normal + vec3(1, 1, 1));
     }
 
     const vec3 unit_direction = unit_vector(r.direction());
@@ -51,17 +38,21 @@ int main()
     const vec3 vertical{0.0, 2.0, 0.0};
     const vec3 origin{0.0, 0.0, 0.0};
 
+    hittable_list world;
+    world.add(std::make_shared<sphere>(vec3(0, 0, -1), 0.5));
+    world.add(std::make_shared<sphere>(vec3(0, -100.5, -1), 100));
+
     for (int j = image_height - 1; j >= 0; --j)
     {
         std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 
         for (int i = 0; i < image_width; ++i)
         {
-            const auto u = double(i) / image_width;
-            const auto v = double(j) / image_height;
+            const auto u = static_cast<double>(i) / image_width;
+            const auto v = static_cast<double>(j) / image_height;
             ray r{origin, lower_left_corner + u * horizontal + v * vertical};
-            vec3 color = ray_color(r);
 
+            vec3 color = ray_color(r, world);
             color.write_color(std::cout);
         }
     }
