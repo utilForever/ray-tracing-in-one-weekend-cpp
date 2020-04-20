@@ -51,6 +51,7 @@ int main()
     const int image_height = 250;
     const int samples_per_pixel = 100;
     const int max_depth = 50;
+    const auto aspect_ratio = static_cast<double>(image_width) / image_height;
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
@@ -68,7 +69,8 @@ int main()
     world.add(std::make_shared<sphere>(vec3(-1, 0, -1), -0.45,
                                        std::make_shared<dielectric>(1.5)));
 
-    const camera cam;
+    const camera cam(vec3{-2, 2, 1}, vec3{0, 0, -1}, vec3{0, 1, 0}, 90,
+                     aspect_ratio);
 
     for (int j = image_height - 1; j >= 0; --j)
     {
