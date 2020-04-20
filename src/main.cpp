@@ -69,8 +69,14 @@ int main()
     world.add(std::make_shared<sphere>(vec3(-1, 0, -1), -0.45,
                                        std::make_shared<dielectric>(1.5)));
 
-    const camera cam(vec3{-2, 2, 1}, vec3{0, 0, -1}, vec3{0, 1, 0}, 90,
-                     aspect_ratio);
+    const vec3 lookfrom{3, 3, 2};
+    const vec3 lookat{0, 0, -1};
+    const vec3 vup{0, 1, 0};
+    const auto dist_to_focus = (lookfrom - lookat).length();
+    const auto aperture = 2.0;
+
+    const camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture,
+                     dist_to_focus);
 
     for (int j = image_height - 1; j >= 0; --j)
     {
