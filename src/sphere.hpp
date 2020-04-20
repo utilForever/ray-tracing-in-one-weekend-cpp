@@ -17,7 +17,8 @@ class sphere final : public hittable
 {
  public:
     sphere() = default;
-    sphere(vec3 cen, double r) : center(cen), radius(r)
+    sphere(vec3 cen, double r, std::shared_ptr<material> m)
+        : center(cen), radius(r), mat_ptr(m)
     {
         // Do nothing
     }
@@ -27,6 +28,7 @@ class sphere final : public hittable
 
     vec3 center;
     double radius{0.0};
+    std::shared_ptr<material> mat_ptr;
 };
 
 inline bool sphere::hit(const ray& r, double t_min, double t_max,
@@ -50,6 +52,7 @@ inline bool sphere::hit(const ray& r, double t_min, double t_max,
 
             const vec3 outward_normal = (rec.p - center) / radius;
             rec.set_face_normal(r, outward_normal);
+            rec.mat_ptr = mat_ptr;
 
             return true;
         }
@@ -63,6 +66,7 @@ inline bool sphere::hit(const ray& r, double t_min, double t_max,
 
             const vec3 outward_normal = (rec.p - center) / radius;
             rec.set_face_normal(r, outward_normal);
+            rec.mat_ptr = mat_ptr;
 
             return true;
         }

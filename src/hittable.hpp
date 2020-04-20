@@ -12,10 +12,13 @@
 
 #include "ray.hpp"
 
+class material;
+
 struct hit_record
 {
     vec3 p;
     vec3 normal;
+    std::shared_ptr<material> mat_ptr;
     double t{0.0};
     bool front_face{false};
 
